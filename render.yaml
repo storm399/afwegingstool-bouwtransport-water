@@ -1,0 +1,27 @@
+# Render deployment config
+# Documentatie: https://render.com/docs/yaml-spec
+#
+# Hoe te gebruiken:
+# 1. Push deze code naar GitHub
+# 2. Log in op render.com (gratis account)
+# 3. Klik "New" → "Blueprint" → kies je GitHub-repo
+# 4. Render leest dit bestand automatisch en doet de rest
+
+services:
+  - type: web
+    name: afwegingstool-water
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
