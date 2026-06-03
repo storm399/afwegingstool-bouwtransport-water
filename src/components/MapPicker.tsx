@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -30,12 +30,23 @@ function ClickHandler({ onClick }: { onClick: (lat: number, lon: number) => void
   return null;
 }
 
+/** Re-centreert de kaart en zoomt in wanneer lat/lon van buitenaf wijzigt (zoekresultaat). */
+function MapRecenter({ lat, lon }: { lat: number; lon: number }) {
+  const map = useMap();
+  useEffect(() => {
+    // Default-positie (NL midden) → uitgezoomd; specifieke locatie → ingezoomd
+    const isDefault = Math.abs(lat - 52.0907) < 0.001 && Math.abs(lon - 5.1214) < 0.001;
+    map.setView([lat, lon], isDefault ? 7 : 15, { animate: true });
+  }, [lat, lon, map]);
+  return null;
+}
+
 export default function MapPicker({ lat, lon, onLocationChange }: Props) {
   return (
     <div className="rounded-lg overflow-hidden border-2 border-bordeaux/20" style={{ height: '380px' }}>
       <MapContainer
         center={[lat, lon]}
-        zoom={lat === 52.0907 ? 7 : 14}
+        zoom={lat === 52.0907 ? 7 : 15}
         scrollWheelZoom={true}
         style={{ height: '100%', width: '100%' }}
       >
@@ -45,6 +56,7 @@ export default function MapPicker({ lat, lon, onLocationChange }: Props) {
         />
         <Marker position={[lat, lon]} />
         <ClickHandler onClick={onLocationChange} />
+        <MapRecenter lat={lat} lon={lon} />
       </MapContainer>
     </div>
   );
